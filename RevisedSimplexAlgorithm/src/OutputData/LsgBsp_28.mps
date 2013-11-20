@@ -1,0 +1,5 @@
+Es folgen die Ergebnisse:
+1827.0
+Y1   39.0
+Y4   30.0
+Y3   48.0
