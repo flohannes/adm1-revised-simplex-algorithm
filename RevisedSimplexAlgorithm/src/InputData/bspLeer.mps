@@ -1,0 +1,17 @@
+
+ROWS
+L X1
+L X2
+L X3
+N COST
+
+COLUMNS
+Y1  X1  1  X3 -1
+Y1  COST  -1
+Y2  X2  1
+Y2  X3  -1  COST  -2
+
+RHS
+B   X1  1  X2  1
+B   X3  -3
+ENDATA
