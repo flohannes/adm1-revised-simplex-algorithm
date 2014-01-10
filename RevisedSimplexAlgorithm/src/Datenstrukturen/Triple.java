@@ -4,17 +4,24 @@ public class Triple{
 
 	private int row;	//sonst: 0 für nichtbasis, 1 für basis
 	private int column;	//sonst: row
-	private double entry;
+	private Fraction entry;
 	
 	/**
 	 * @param row
 	 * @param column
 	 * @param entry
 	 */
-	public Triple(int row, int column, double entry) {
+	public Triple(int row, int column, Fraction entry) {
 		this.row = row ;
 		this.column = column;
 		this.entry = entry;
+	}
+	
+	public Triple(int row, int column, double entry) {
+		this.row = row ;
+		this.column = column;
+		this.entry = new Fraction(entry);
+//		this.entry = this.entry.doubleToFraction(entry);
 	}
 	
 	public Triple(){
@@ -37,12 +44,17 @@ public class Triple{
 		this.column = column;
 	}
 
-	public double getEntry() {
+	public Fraction getEntry() {
 		return entry;
 	}
 
-	public void setEntry(double entry) {
+	public void setEntry(Fraction entry) {
 		this.entry = entry;
+	}
+	
+	public void setEntry(double entry) {
+		this.entry = new Fraction(entry);
+//		this.entry.doubleToFraction(entry);
 	}
 	
 	public int getNum(){

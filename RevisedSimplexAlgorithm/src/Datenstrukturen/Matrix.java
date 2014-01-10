@@ -146,12 +146,16 @@ public class Matrix {
 		}
 	}
 	
-	public double multiplyRowColumn(Matrix m,int indexRow, int indexColumn){
-		double sum=0;
+	public Fraction multiplyRowColumn(Matrix m,int indexRow, int indexColumn){
+		Fraction sum = new Fraction(0);
 		Vector col = m.getMatrixColumn(indexColumn);
 		for(int i=0 ; i<rows.get(indexRow).size() ; i++){
 			int tmp = rows.get(indexRow).get(i).getColumn();
-			sum += rows.get(indexRow).get(i).getEntry()*col.get(tmp);
+			if(col.get(tmp) == null || rows.get(indexRow).get(i).getEntry()==null){
+				
+			} else{
+				sum = sum.add( rows.get(indexRow).get(i).getEntry().multiply(col.get(tmp)) );
+			}
 		}
 		return sum;
 	}
@@ -166,12 +170,12 @@ public class Matrix {
 	
 	}
 	
-	public double multiplyVectorMatrixColumn(Vector vec, int columnIndex){
+	public Fraction multiplyVectorMatrixColumn(Vector vec, int columnIndex){
 		int k=0;
-		double sum = 0;
+		Fraction sum = new Fraction(0);
 
 		for( Triple t : columns.get(columnIndex))
-			sum += t.getEntry()*vec.get(t.getRow());
+			sum = sum.add( t.getEntry().multiply(vec.get(t.getRow())) );
 		
 		return sum;
 	}
@@ -187,13 +191,17 @@ public class Matrix {
 		if( vec.getLength() != colNum)//Dimensions-check
 			throw new IllegalArgumentException("Matrixdimension mismatch");
 		
-		double[] result = new double[rowNum];
+		Fraction[] result = new Fraction[rowNum];
 //		Vector result = new Vector();
 		for( int k=0 ; k<rowNum ; k++){
-			double sum = 0;
+			Fraction sum = new Fraction(0);
 			for(Triple trip : rows.get(k)){
 				int colInd = trip.getColumn();
-				sum += trip.getEntry()*vec.get(colInd);
+				if(trip.getEntry()==null || vec.get(colInd)==null){
+					
+				} else{
+					sum = sum.add( trip.getEntry().multiply(vec.get(colInd)) );
+				}
 			}
 			result[k] = sum;
 		}
@@ -211,14 +219,18 @@ public class Matrix {
 //								throws IllegalArgumentException{
 //		if( vec.getSize() != rowNum)//Dimensions-check
 //			throw new IllegalArgumentException("Dimension mismatch");
-		double[] result = new double[colNum];
+		Fraction[] result = new Fraction[colNum];
 //		Vector result = new Vector();
 		
 		for( int k=0 ; k<colNum ; k++){
-			double sum = 0;
+			Fraction sum = new Fraction(0);
 			for(Triple trip : columns.get(k)){
 				int rowInd = trip.getRow();
-				sum += trip.getEntry()*vec.get(rowInd);
+				if(vec.get(rowInd)==null || trip.getEntry()==null){
+					
+				} else{
+					sum = sum.add( trip.getEntry().multiply(vec.get(rowInd)) );
+				}
 			}
 			result[k] = sum;
 		}
@@ -240,7 +252,7 @@ public class Matrix {
 			int row = x;						//und bearbeite entsprechende Zeile von A
 			if( row == index) continue;
 			for( int i=0 ; i<colNum ; i++){
-				double entry_index = 0.;//Eintrag in A, Zeile 'index'
+				Fraction entry_index = new Fraction(0.);//Eintrag in A, Zeile 'index'
 				//double entry_row =0;//Eintrag in A, Zeile 'row'
 				int k=0;
 				while( columns.get(i).get(k).getRow() < index ){//suche Element in der aktuellen Spalte
@@ -255,7 +267,7 @@ public class Matrix {
 					entry_index = columns.get(i).get(k).getEntry();
 				}
 				if(row == index){// 'index'- Zeile
-					columns.get(i).get(k).setEntry(entry_index * eta.getVec()[x]);
+					columns.get(i).get(k).setEntry( entry_index.multiply(eta.getVec()[x]) );
 					//er sollte den Eintrag implizit auch in rows aendern, tut er hoffentlich
 					//sollte aber noch ueberprueft werden TODO
 				}else if( row < index){
@@ -265,13 +277,14 @@ public class Matrix {
 						if( j == columns.get(i).size()) break;
 					}
 					if( j == columns.get(i).size() || columns.get(i).get(j).getRow() > row){//Element ist 0 
-						Triple trip = new Triple( row , i , entry_index*eta.getVec()[x]);
+						Triple trip = new Triple( row , i , entry_index.multiply(eta.getVec()[x]) );
 						columns.get(i).add(j, trip);
 						insertNewElementToRows(row, i, trip);
 				
 					}else
 					if( columns.get(i).get(j).getRow() == row){
-						columns.get(i).get(j).setEntry(entry_index * eta.getVec()[x] + columns.get(i).get(j).getEntry());
+						Fraction tmpEntry = entry_index.multiply(eta.getVec()[x]);
+						columns.get(i).get(j).setEntry( tmpEntry.add( columns.get(i).get(j).getEntry()) );
 					}
 				}else{//row > index
 					while( columns.get(i).get(k).getRow() < row ){
@@ -280,14 +293,15 @@ public class Matrix {
 					}
 					if(k == columns.get(i).size() || columns.get(i).get(k).getRow() > row ){//Element ist 0
 //						System.out.println(entry_index);
-						Triple trip = new Triple( row , i , entry_index*eta.getVec()[x]);
+						Triple trip = new Triple( row , i , entry_index.multiply(eta.getVec()[x]) );
 //						System.out.println(trip.getEntry());
 						columns.get(i).add(k ,trip);
 						insertNewElementToRows(row, i, trip);
 					
 					}else
 					if( columns.get(i).get(k).getRow() == row){
-						columns.get(i).get(k).setEntry(entry_index * eta.getVec()[x] + columns.get(i).get(k).getEntry());
+						Fraction tmpEntry = entry_index.multiply(eta.getVec()[x]);
+						columns.get(i).get(k).setEntry(tmpEntry.add(columns.get(i).get(k).getEntry()) );
 
 					}
 
@@ -301,7 +315,7 @@ public class Matrix {
 		int row = index;
 		int x = index;
 		for( int i=0 ; i<colNum ; i++){
-			double entry_index = 0.;//Eintrag in A, Zeile 'index'
+			Fraction entry_index = new Fraction(0.);//Eintrag in A, Zeile 'index'
 			//double entry_row =0;//Eintrag in A, Zeile 'row'
 			int k=0;
 			while( columns.get(i).get(k).getRow() < index ){//suche Element in der aktuellen Spalte
@@ -314,7 +328,7 @@ public class Matrix {
 			}
 			if( columns.get(i).get(k).getRow() == index){//es ist ungl. 0 mit Wert 'entry'
 				entry_index = columns.get(i).get(k).getEntry();
-				columns.get(i).get(k).setEntry(entry_index * eta.getVec()[x]);
+				columns.get(i).get(k).setEntry(entry_index.multiply(eta.getVec()[x]) );
 			}
 		}
 	}
@@ -330,7 +344,7 @@ public class Matrix {
 	
 	public void negateRow(int row){
 		for(Triple e : this.rows.get(row)){
-			e.setEntry(-e.getEntry());
+			e.setEntry(e.getEntry().negate());
 		}
 	}
 	
@@ -378,7 +392,7 @@ public class Matrix {
 	}
 	
 	private Vector getMatrixColumn(int i){
-		double[] vec = new double[rowNum];
+		Fraction[] vec = new Fraction[rowNum];
 		
 		for( Triple t : columns.get(i)){
 			vec[t.getRow()] = t.getEntry();
@@ -400,10 +414,10 @@ public class Matrix {
 //		test.addEntry(2, 1, 1);
 		test.addEntry(2, 2, 2);
 
-		double[] vec = new double[3];
-		vec[0]=1./3;
-		vec[1]=-4./3;
-		vec[2]=-1./3;
+		Fraction[] vec = new Fraction[3];
+		vec[0]=new Fraction(1./3);
+		vec[1]=new Fraction(-4./3);
+		vec[2]=new Fraction(-1./3);
 		Vector vect = new Vector(vec);
 		System.out.println(vect);
 		
