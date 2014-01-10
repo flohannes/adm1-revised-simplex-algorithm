@@ -433,7 +433,7 @@ public class Simplex {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Output out = null;
-		String dataName = "boeing2.lp";
+		String dataName = "small2.lp";
 		InputLP in = new InputLP();
 		LP lin = in.readLP("src/InputData/"+dataName);
 //			System.out.println(in.getM().toString());

@@ -36,6 +36,7 @@ public class InputLP {
 			ec = new ArrayList<Tupel<String, String>>();
 			double[][] matrix = lpreader.constraintsMatrix();
 			m = new Matrix();
+			boolean[] unboundedVariables = new boolean[lpreader.noOfVariables()];
 			for(int i = 0; i < lpreader.noOfConstraints(); i++){
 				rn.add(lpreader.constraintName(i));
 				m.addRow();
@@ -43,6 +44,7 @@ public class InputLP {
 			for(int i = 0; i < lpreader.noOfVariables(); i++){
 				cn.add(lpreader.variableName(i));
 				m.addColumn();
+				unboundedVariables[i] = false;
 			}
 			for(int i = 0; i < lpreader.noOfVariables(); i ++){
 				for(int j = 0; j < lpreader.noOfConstraints(); j++){
@@ -68,12 +70,25 @@ public class InputLP {
 					numberOfSchlupfs++;
 				}
 				if(lowerboundvector[i] != 0){
-					m.addRow();
-					m.addEntry(m.getRowNum()-1, i, 1);
-					rn.add("lowerBound"+i);
-					ec.add(new Tupel("G", "lowerBound"+i));
-					rhsBounds.add(lowerboundvector[i]);
-					numberOfSchlupfs++;
+//					if(lowerboundvector[i]<0){
+//						m.addRow();
+//						m.addEntry(m.getRowNum()-1, i, 1);
+//						m.addColumn();
+//						m.addEntry(m.getRowNum()-1, m.getColNum()-1, -1);
+//						cn.add(lpreader.variableName(i)+"-");
+//						unboundedVariables[i] = true;
+//						rn.add("lowerBound"+i);
+//						ec.add(new Tupel("G", "lowerBound"+i));
+//						rhsBounds.add(lowerboundvector[i]);
+//						numberOfSchlupfs++;
+//					} else {
+						m.addRow();
+						m.addEntry(m.getRowNum()-1, i, 1);
+						rn.add("lowerBound"+i);
+						ec.add(new Tupel("G", "lowerBound"+i));
+						rhsBounds.add(lowerboundvector[i]);
+						numberOfSchlupfs++;
+//					}
 				}
 //				System.out.println(i + ": " + lowerboundvector[i]);
 			}
