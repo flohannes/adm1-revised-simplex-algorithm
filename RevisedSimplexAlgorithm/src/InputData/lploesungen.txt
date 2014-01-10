@@ -1,0 +1,119 @@
+LP filesFile
+	Constraints
+	Variables
+	Size
+	Optimum
+small1.lp
+	5
+	3
+	193
+	unbounded
+small2.lp
+	4
+	3
+	184
+	622/27
+small3.lp
+	5
+	3
+	169
+	9/2
+small4.lp
+	3
+	3
+	151
+	-40/31
+small5.lp
+	4
+	4
+	186
+	7/4
+small6.lp
+	4
+	3
+	150
+	1
+small7.lp
+	4
+	3
+	139
+	-5
+small8.lp
+	5
+	3
+	170
+	infeasible
+afiro.lp
+	27
+	32
+	1.2K
+	-1626636/35
+sc50a.lp
+	48
+	50
+	2.6K
+	-146650/2271
+sc50b.lp
+	48
+	50
+	2.4K
+	-70
+kb2.lp
+	41
+	43
+	5.4K
+	-2962097218191717082297174271125/140423267015281505690596
+(~ -2.10941e+07)
+recipe.lp
+	91
+	181
+	17K
+	-2666160000000
+adlittle.lp
+	56
+	97
+	6.8K
+	2650772733851515844241733733571/1226341736102523739160000
+boeing2.lp
+	166
+	162
+	25K
+	681754139875510048813163/57490331099250000
+boeing1.lp
+	351
+	473
+	69K
+	-3.352008E7
+fit1d.lp
+	24
+	1026
+	206K
+	
+fit2d.lp
+	25
+	10500
+	1.9M
+	
+
+Requirements:
+
+ 
+
+    reading LP files(CPLEX LP format)
+    calculating with exact fractions
+    solving all LPs in general(with enoug time, memory,...)
+    giving objective and values of variables in for of a solution file 
+    line 1 : "solution status: <status>"
+    line 2 : "objective value: <value>"
+    line 3+: "<variable name> <value>"
+    command line interface:
+    java Simplex <LP file> -o <solution file>
+    -> solves <LP File> and writes solution to <solution file>
+    no graphical userinterface required
+
+Solution files:
+
+    Solution status is one of the following: optimal, unbounded, infeasible
+    Variables with value zero can be omitted
+    infeasible/unbounded cases do not need lines for obj. value and variable values
+    only original variables in this file, no surplus, slack,...

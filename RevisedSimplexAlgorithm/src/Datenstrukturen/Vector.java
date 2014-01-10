@@ -4,20 +4,20 @@ import java.util.ArrayList;
 
 public class Vector {
 
-	private double[] vec;
+	private Fraction[] vec;
 	
 	private int size;
 	
 	public Vector(int size){
-		vec = new double[size];
+		vec = new Fraction[size];
 	}
 	
-	public Vector(double[] d){
+	public Vector(Fraction[] d){
 		vec = d;
 	}
 	
 	public void negateBi(int i){
-		vec[i] = -vec[i];
+		vec[i] = vec[i].negate();
 	}
 	
 //	public void addEntry(int isBasis,int index, double value) throws IllegalArgumentException{
@@ -47,14 +47,14 @@ public class Vector {
 		return vec.length;
 	}
 	
-	public double get(int index){
+	public Fraction get(int index){
 		return vec[index];
 	}
 
 	@Override
 	public String toString() {
 		String out = "";
-		for( Double t : vec){
+		for( Fraction t : vec){
 			out += ""+t+ " ; ";
 		}
 		return "Vector: \n"+out;
@@ -72,18 +72,18 @@ public class Vector {
 		this.size = size;
 	}
 	
-	public double[] getVec() {
+	public Fraction[] getVec() {
 		return vec;
 	}
 	
 	
 
-	public void setVec(double[] vec) {
+	public void setVec(Fraction[] vec) {
 		this.vec = vec;
 	}
 	
 	public void deleteEntry(int index){
-		double[] ne = new double[vec.length-1];
+		Fraction[] ne = new Fraction[vec.length-1];
 		int count=0;
 		for(int i=0;i< vec.length ;i++){
 			if(i != index){
@@ -95,7 +95,7 @@ public class Vector {
 	}
 	
 	public Vector clone(){
-		double[] newV = new double[this.getVec().length];
+		Fraction[] newV = new Fraction[this.getVec().length];
 		for(int i = 0; i < newV.length; i++){
 			newV[i] = this.getVec()[i];
 		}

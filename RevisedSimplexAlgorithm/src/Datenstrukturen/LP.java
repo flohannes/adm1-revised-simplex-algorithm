@@ -36,10 +36,10 @@ public class LP {
 				m.addEntry(rn.indexOf(eq.getEntry()), m.getColNum()-1, 1);
 				for(int i = 0; i < b.getVec().length; i++){//Vektor b durchsuchen nach passenden eintrag
 					if(i == rn.indexOf(eq.getEntry())){
-						if(b.getVec()[i] > 0){//schlupfvariable als basis
+						if(b.getVec()[i].doubleValue() > 0){//schlupfvariable als basis
 							basis[rn.indexOf(eq.getEntry())] = m.getColNum()-1;
 							break;
-						}else if(b.getVec()[i] < 0){//gesamte Gleichung negieren
+						}else if(b.getVec()[i].doubleValue() < 0){//gesamte Gleichung negieren
 							m.negateRow(rn.indexOf(eq.getEntry()));
 							b.negateBi(rn.indexOf(eq.getEntry()));
 							break;
@@ -56,12 +56,12 @@ public class LP {
 				m.addEntry(rn.indexOf(eq.getEntry()), m.getColNum()-1, -1);
 				for(int i = 0; i < b.getVec().length; i++){
 					if(i == rn.indexOf(eq.getEntry())){
-						if(b.getVec()[i] < 0){
+						if(b.getVec()[i].doubleValue() < 0){
 							basis[rn.indexOf(eq.getEntry())] = m.getColNum()-1;
 							m.negateRow(rn.indexOf(eq.getEntry()));
 							b.negateBi(rn.indexOf(eq.getEntry()));
 							break;
-						}else if(b.getVec()[i] > 0){
+						}else if(b.getVec()[i].doubleValue() > 0){
 							break;
 						}
 					}
@@ -72,7 +72,7 @@ public class LP {
 				}
 			} else if(eq.getNum().equals("E")){//Gleichungen
 				for(int i = 0; i < b.getVec().length; i++){
-					if(i == rn.indexOf(eq.getEntry()) && b.getVec()[i] < 0){
+					if(i == rn.indexOf(eq.getEntry()) && b.getVec()[i].doubleValue() < 0){
 						m.negateRow(rn.indexOf(eq.getEntry()));
 						b.negateBi(rn.indexOf(eq.getEntry()));
 						break;

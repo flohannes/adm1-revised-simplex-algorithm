@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import Datenstrukturen.Fraction;
 import Datenstrukturen.Vector;
 
 public class Output {
@@ -13,18 +14,19 @@ public class Output {
 	private Vector bQuer;
 	private int[] basis;
 	private String path;
+	private String status;
 	
 	private final String eol = System.getProperty("line.separator");
 
 	
 	public Output(ArrayList<String> cn,
-			Vector bQuer, int[] basis, double optimum, String path) {
+			Vector bQuer, int[] basis, Fraction optimum, String status, String path) {
 		this.cn = cn;
 		this.bQuer = bQuer;
 		this.basis = basis;
 		this.path = path;
 		
-		double optimalWert = optimum;
+		Fraction optimalWert = optimum;
 		
 //		for(int i = 0; i < originalCostFunction.getVec().length; i++){
 //			for(int j = 0; j < cn.size(); j++){
@@ -42,10 +44,13 @@ public class Output {
 			BufferedWriter out = new BufferedWriter(fstream);
 			
 //			out.write("Es folgen die Ergebnisse:" + eol);
-			out.write(optimalWert + eol);
-			for(int i = 0; i < basis.length; i++){
-				if(bQuer.get(i) != 0 && basis[i]<cn.size()){
-					out.write(cn.get(basis[i])+ "   "+ bQuer.get(i) + eol);
+			out.write("Status " + status + eol);
+			if(status.equals("Optimal")){
+				out.write("Optimum " + optimalWert + eol);
+				for(int i = 0; i < basis.length; i++){
+					if(bQuer.get(i).doubleValue() != 0 && basis[i]<cn.size()){
+						out.write(cn.get(basis[i])+ "   "+ bQuer.get(i) + eol);
+					}
 				}
 			}
 			//minimale Kosten ausgeben
@@ -55,6 +60,26 @@ public class Output {
 	//				out.write(a.getTail().getId() + " " + a.getHead().getId() + " " + a.getFlowX() + eol);
 	//			}
 	//		}	
+			
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public Output(String status, String path) {
+
+		this.path = path;
+		
+		FileWriter fstream;
+		try {
+			fstream = new FileWriter(path);
+			System.out.println(path);
+			BufferedWriter out = new BufferedWriter(fstream);
+			
+			out.write("Status " + status + eol);
 			
 			out.close();
 		} catch (IOException e) {

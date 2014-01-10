@@ -1,14 +1,11 @@
 package Algo;
 
-import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
-import java.util.ArrayList;
-
+import Datenstrukturen.Fraction;
 import Datenstrukturen.LP;
 import Datenstrukturen.Matrix;
 import Datenstrukturen.Tupel;
 import Datenstrukturen.Vector;
-import Parser.Input;
+import Parser.InputLP;
 import Parser.Output;
 
 public class Simplex {
@@ -22,11 +19,11 @@ public class Simplex {
 	private Matrix m;
 	public boolean isPerfect;
 	private Vector bQuer;
-	private boolean istUnbeschraenkt;
-	private boolean istLeer;
+	public boolean istUnbeschraenkt;
+	public boolean istLeer;
 	private Vector b;
 	private boolean showComments;
-	
+	private boolean isBlandOn;
 
 	public Simplex(LP lp){
 		this.istUnbeschraenkt = false;
@@ -40,6 +37,7 @@ public class Simplex {
 		this.isPerfect = false;
 		this.bQuer = lp.getB().clone();
 		this.b = lp.getB().clone();
+		this.isBlandOn = false;
 	}
 	
 	
@@ -57,8 +55,14 @@ public class Simplex {
 			this.phase2();
 		}
 		
-		if(isPerfect)
-			System.out.println("Optimales Ergebnis: " + this.getOptimum());
+		if(isPerfect){
+			Fraction erg;
+			if(!lp.isMax())
+				erg = this.getOptimum().negate();
+			else
+				erg = this.getOptimum();
+			System.out.println("Optimales Ergebnis: " + erg);
+		}
 		else if(istUnbeschraenkt){
 			System.out.println("Unbeschraenkt!!");
 		}
@@ -66,11 +70,13 @@ public class Simplex {
 	}
 	
 	private void phase1(){
-		double[] costP = new double[lp.getM().getColNum()];
+		int iterationsWithoutChanges = 0;
+		Fraction actualOptimum = new Fraction(0);
+		Fraction[] costP = new Fraction[lp.getM().getColNum()];
 		int indexOfKuenstlicheVar = lp.getIndexOfKuenstlicheVar();
 		for(int b : basis){
 			if(b>=indexOfKuenstlicheVar){
-				costP[b] = -1 ;
+				costP[b] = new Fraction(-1) ;
 			}
 		}
 		Vector costP1 = new Vector(costP);
@@ -103,6 +109,29 @@ public class Simplex {
 //				System.out.println(this.basis[i]);
 //			}
 //			System.out.println();
+			
+			Fraction optimum = new Fraction(0);
+			for(int i = 0; i < basis.length; i++){
+				if(costP1.get(basis[i])==null||bQuer.get(i)==null){
+					
+				} else{
+					optimum = optimum.add( costP1.get(basis[i]).multiply(bQuer.get(i)) );
+				}
+			}
+			if(actualOptimum == optimum){
+				iterationsWithoutChanges++;
+			} else {
+				actualOptimum = optimum;
+				iterationsWithoutChanges = 0;
+			}
+			if(iterationsWithoutChanges >= 20){
+				System.out.println("TRUE");
+				this.isBlandOn = true;
+			} else {
+				this.isBlandOn = false;
+//				System.out.println(actualOptimum);
+			}
+			
 			counter++;
 		}
 		int basisLengthCounter=0;
@@ -110,7 +139,8 @@ public class Simplex {
 //		System.out.println("BasisInv: "+basisInverse);
 		for(int i = 0; i < this.basis.length; i++){
 			if(basis[i] >= indexOfKuenstlicheVar){
-				if(this.bQuer.getVec()[i] > 0){
+				if(this.bQuer.getVec()[i].signum() > 0){
+					System.out.println(this.bQuer.getVec()[i].doubleValue());
 					this.istLeer = true;
 					break;
 				}
@@ -118,7 +148,7 @@ public class Simplex {
 					boolean count = true;
 					for(int j = 0; j < this.nichtbasis.length; j++){
 						if(nichtbasis[j] < indexOfKuenstlicheVar){
-							if(basisInverse.multiplyRowColumn(m, i, nichtbasis[j]) != 0){
+							if(basisInverse.multiplyRowColumn(m, i, nichtbasis[j]).doubleValue() != 0){
 //								System.out.println("BasisInv: "+basisInverse);
 //								System.out.println("Matrix: "+m );
 //								System.out.println("row: "+i);
@@ -173,7 +203,8 @@ public class Simplex {
 	}
 	
 	private void phase2(){
-		
+		int iterationsWithoutChanges = 0;
+		Fraction actualOptimum = new Fraction(0);
 //		System.out.println(BasisToString());
 //		basisInverse.createI(basis.length);
 //		System.out.println(this.bQuer);
@@ -202,13 +233,26 @@ public class Simplex {
 //			}
 			counter++;
 //			System.out.println("BasisInv: "+basisInverse);
+			
+			if(actualOptimum == this.getOptimum()){
+				iterationsWithoutChanges++;
+			} else {
+				actualOptimum = this.getOptimum();
+				iterationsWithoutChanges = 0;
+			}
+			if(iterationsWithoutChanges >= 20){
+				this.isBlandOn = true;
+				System.out.println("TRUE");
+			} else {
+				this.isBlandOn = false;
+			}
 		}
 	}
 	
 	
 	private void BTRAN(Vector cost){
 //		Vector cB = new Vector();
-		double[] cBi = new double[basis.length];
+		Fraction[] cBi = new Fraction[basis.length];
 //		System.out.println(cost.getLength());
 //		System.out.println(m.getColNum());
 		for(int i = 0; i < basis.length; i++){
@@ -224,23 +268,35 @@ public class Simplex {
 	
 	private int PRICE( Vector cost){
 		int MaxIndex =-1;
-		double max=0;
+		Fraction max= new Fraction(0);
 		int MaxMinIndex= Integer.MAX_VALUE; //
 		
 		for( int i=0 ; i<nichtbasis.length ; i++){
-			
-			double redCost = cost.get(nichtbasis[i]) - m.multiplyVectorMatrixColumn(schattenpreise, nichtbasis[i]);
-			if(redCost > 0 && nichtbasis[i] < MaxMinIndex){//Kleinster-Variablen-Index-Regel
-				MaxIndex = i;
-				MaxMinIndex = nichtbasis[i];
-				max=redCost;
+			Fraction redCost;
+			if(cost.get(nichtbasis[i]) == null && m.multiplyVectorMatrixColumn(schattenpreise, nichtbasis[i]) != null){
+				redCost = m.multiplyVectorMatrixColumn(schattenpreise, nichtbasis[i]).negate();
+			} else if (cost.get(nichtbasis[i]) != null && m.multiplyVectorMatrixColumn(schattenpreise, nichtbasis[i]) == null){
+				redCost = cost.get(nichtbasis[i]);
+			} else if (cost.get(nichtbasis[i]) == null && m.multiplyVectorMatrixColumn(schattenpreise, nichtbasis[i]) == null){
+				redCost = new Fraction(0);
+			} else{
+				redCost = cost.get(nichtbasis[i]).subtract( m.multiplyVectorMatrixColumn(schattenpreise, nichtbasis[i]) );
 			}
-//			if( redCost > max){//Steilster-Anstieg-Regel
-//				MaxIndex = i;	
-//				max = redCost;
-//			}
+			
+			if(this.isBlandOn){
+				if(redCost.doubleValue() > 0 && nichtbasis[i] < MaxMinIndex){//Kleinster-Variablen-Index-Regel
+					MaxIndex = i;
+					MaxMinIndex = nichtbasis[i];
+					max=redCost;
+				}
+			} else {
+				if( redCost.doubleValue()>max.doubleValue()){//Steilster-Anstieg-Regel
+					MaxIndex = i;	
+					max = redCost;
+				}
+			}
 		}
-		if( max == 0)
+		if( max.doubleValue()== 0)
 			isPerfect = true;
 //		System.out.println("Reduzierte Kosten: "+max);
 		if(showComments){
@@ -267,42 +323,52 @@ public class Simplex {
 	}
 	
 	public int CHUZR(Vector d){
-		Tupel<Integer,Double> lambda0 = this.lambda0(d);
+		Tupel<Integer,Fraction> lambda0 = this.lambda0(d);
 		if(showComments){
 			System.out.println(lambda0.getNum());
 		}
 		return lambda0.getNum();
 	}
 	
-	private Tupel<Integer, Double> lambda0(Vector d){
-		double minLambda=Double.POSITIVE_INFINITY;
+	private Tupel<Integer, Fraction> lambda0(Vector d){
+		Fraction minLambda= new Fraction(999999999/0.00000000000001);
 		int index = -1;
 		int MinIndex=0;
 		for(int i = 0; i < this.bQuer.getVec().length; i++){
-			if(minLambda > this.bQuer.get(i) / d.get(i) && d.get(i) > 0){
-				minLambda = this.bQuer.get(i) / d.get(i);
-				index = i;
-				MinIndex = basis[i];
-			}
-			else if(minLambda == this.bQuer.get(i) / d.get(i) && d.get(i) > 0){//Kleinster-Variablen-Index-Regel
-				if(MinIndex > basis[i]){
-					MinIndex = basis[i];
+//			if(isBlandOn){
+				if(minLambda.doubleValue() > this.bQuer.get(i).doubleValue() / d.get(i).doubleValue()  && d.get(i).doubleValue() > 0){
+					minLambda = this.bQuer.get(i).divide( d.get(i) );
 					index = i;
+					MinIndex = basis[i];
 				}
-			}
+				else if(minLambda.doubleValue()==this.bQuer.get(i).doubleValue()/d.get(i).doubleValue() && d.get(i).doubleValue() > 0){//Kleinster-Variablen-Index-Regel
+					if(MinIndex > basis[i]){
+						MinIndex = basis[i];
+						index = i;
+					}
+				}
+//			} else {
+//				if(minLambda.doubleValue() > this.bQuer.get(i).doubleValue() / d.get(i).doubleValue()  && d.get(i).doubleValue() > 0){
+//					minLambda = this.bQuer.get(i).divide( d.get(i) );
+//					index = i;
+//					MinIndex = basis[i];
+//				}
+//			}
+				
+			
 		}
-		return new Tupel<Integer, Double>(index, minLambda);
+		return new Tupel<Integer, Fraction>(index, minLambda);
 	}
 	
 	public void WRETA(int indexPrice, int indexChuzr, Vector d){
 		if( d== null)System.out.println("null");
-		double[] eta = new double[d.getVec().length];
-		double eintragStelleChuzr = d.get(indexChuzr);
+		Fraction[] eta = new Fraction[d.getVec().length];
+		Fraction eintragStelleChuzr = d.get(indexChuzr);
 		for(int i = 0; i < d.getVec().length; i++){
 			if(i == indexChuzr)
-				eta[i] = 1 / eintragStelleChuzr;
+				eta[i] = new Fraction(1).divide(eintragStelleChuzr);
 			else
-				eta[i] = -d.get(i) / eintragStelleChuzr;
+				eta[i] = d.get(i).negate().divide(eintragStelleChuzr);
 		}
 //		Vector et = new Vector(eta);
 		basisInverse.multiplyEta(new Vector(eta), indexChuzr);
@@ -338,10 +404,14 @@ public class Simplex {
 	}
 
 
-	public double getOptimum(){
-		double optimum=0;
+	public Fraction getOptimum(){
+		Fraction optimum = new Fraction(0);
 		for(int i = 0; i < basis.length; i++){
-			optimum += originalCostFunction.get(basis[i]) * bQuer.get(i);
+			if(originalCostFunction.get(basis[i])==null||bQuer.get(i)==null){
+				
+			} else {
+				optimum = optimum.add( originalCostFunction.get(basis[i]).multiply(bQuer.get(i)) );
+			}
 		}
 		return optimum;
 	}
@@ -363,25 +433,34 @@ public class Simplex {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Output out = null;
-		try {
-			String dataName = "AFIRO.mps";
-			Input in = new Input();
-			LP lin = in.readInput("src/InputData/"+dataName);
-			Simplex simplex = new Simplex(lin);
-			simplex.calculateOptimum(false);
-			
-			if(simplex.isPerfect)
-				out = new Output(in.getCn(), simplex.bQuer, simplex.basis, simplex.getOptimum(), "src/OutputData/Lsg"+dataName);
+		String dataName = "boeing2.lp";
+		InputLP in = new InputLP();
+		LP lin = in.readLP("src/InputData/"+dataName);
+//			System.out.println(in.getM().toString());
+//			System.out.println(in.getRn());
+		Simplex simplex = new Simplex(lin);
+		simplex.calculateOptimum(false);
+		
+//		if(simplex.isPerfect)
+		String status = "";
+		if(simplex.isPerfect){
+			status = "Optimal";
+			out = new Output(in.getCn(), simplex.bQuer, simplex.basis, simplex.getOptimum(),status, "src/OutputData/Lsg"+dataName);
+
+		} else if (simplex.istLeer){
+			status = "Unbounded";
+			out = new Output(status, "src/OutputData/Lsg"+dataName);
+
+		} else if(simplex.istUnbeschraenkt){
+			status = "Infeasable";
+			out = new Output(status, "src/OutputData/Lsg"+dataName);
+
+		}
 //			System.out.println(simplex.bQuer);
 //			for(int i = 0; i < simplex.basis.length; i++){
 //				System.out.println(simplex.basis[i]);
 //			}
 //			for()
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 }
