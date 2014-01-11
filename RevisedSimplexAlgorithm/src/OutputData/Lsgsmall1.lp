@@ -1,1 +1,1 @@
-Status Unbeschränkt
+Status Infeasable
