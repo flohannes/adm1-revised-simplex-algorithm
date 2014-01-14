@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import Datenstrukturen.Fraction;
+import Datenstrukturen.LP;
 import Datenstrukturen.Vector;
 
 public class Output {
@@ -19,7 +20,7 @@ public class Output {
 	private final String eol = System.getProperty("line.separator");
 
 	
-	public Output(ArrayList<String> cn,
+	public Output(LP lp, ArrayList<String> cn,
 			Vector bQuer, int[] basis, Fraction optimum, String status, String path) {
 		this.cn = cn;
 		this.bQuer = bQuer;
@@ -46,7 +47,11 @@ public class Output {
 //			out.write("Es folgen die Ergebnisse:" + eol);
 			out.write("Status " + status + eol);
 			if(status.equals("Optimal")){
-				out.write("Optimum " + optimalWert + eol);
+				if(!lp.isMax())
+					out.write("Optimum " + optimalWert.negate() + eol);
+				else
+					out.write("Optimum " + optimalWert + eol);
+//				out.write("Optimum " + optimalWert + eol);
 				for(int i = 0; i < basis.length; i++){
 					if(bQuer.get(i).doubleValue() != 0 && basis[i]<cn.size()){
 						out.write(cn.get(basis[i])+ "   "+ bQuer.get(i) + eol);

@@ -38,6 +38,8 @@ public class Simplex {
 		this.bQuer = lp.getB().clone();
 		this.b = lp.getB().clone();
 		this.isBlandOn = false;
+		
+//		System.out.println(lp.getM().toString());
 	}
 	
 	
@@ -139,8 +141,8 @@ public class Simplex {
 //		System.out.println("BasisInv: "+basisInverse);
 		for(int i = 0; i < this.basis.length; i++){
 			if(basis[i] >= indexOfKuenstlicheVar){
-				if(this.bQuer.getVec()[i].signum() > 0){
-					System.out.println(this.bQuer.getVec()[i].doubleValue());
+				if(this.bQuer.getVec()[i].doubleValue() > 0){
+//					System.out.println(this.bQuer.getVec()[i].doubleValue());
 					this.istLeer = true;
 					break;
 				}
@@ -426,6 +428,9 @@ public class Simplex {
 		return bQuer;
 	}
 
+	public LP getLp() {
+		return lp;
+	}
 	
 	/**
 	 * @param args
@@ -433,7 +438,7 @@ public class Simplex {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Output out = null;
-		String dataName = "small2.lp";
+		String dataName = "small5.lp";
 		InputLP in = new InputLP();
 		LP lin = in.readLP("src/InputData/"+dataName);
 //			System.out.println(in.getM().toString());
@@ -445,7 +450,7 @@ public class Simplex {
 		String status = "";
 		if(simplex.isPerfect){
 			status = "Optimal";
-			out = new Output(in.getCn(), simplex.bQuer, simplex.basis, simplex.getOptimum(),status, "src/OutputData/Lsg"+dataName);
+			out = new Output(lin, in.getCn(), simplex.bQuer, simplex.basis, simplex.getOptimum(),status, "src/OutputData/Lsg"+dataName);
 
 		} else if (simplex.istLeer){
 			status = "Unbounded";

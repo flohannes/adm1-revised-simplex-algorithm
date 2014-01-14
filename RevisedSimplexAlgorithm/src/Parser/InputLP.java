@@ -29,6 +29,7 @@ public class InputLP {
 	public LP readLP( String path){
 		int numberOfSchlupfs = 0;
 		int numberOfUnboundedVariables = 0;
+		int numberOfNegativeVariables = 0;
 		LPReader lpreader = new LPReader(path);
 		try {
 			lpreader.readLP();
@@ -38,6 +39,7 @@ public class InputLP {
 			double[][] matrix = lpreader.constraintsMatrix();
 			m = new Matrix();
 			boolean[] unboundedVariables = new boolean[lpreader.noOfVariables()];
+			boolean[] negativeVariables = new boolean[lpreader.noOfVariables()];
 			for(int i = 0; i < lpreader.noOfConstraints(); i++){
 				rn.add(lpreader.constraintName(i));
 				m.addRow();
@@ -49,13 +51,21 @@ public class InputLP {
 			double[] upperboundvector = lpreader.upperBoundVector();
 			double[] lowerboundvector = lpreader.lowerBoundVector();
 			for(int i = 0; i < lpreader.noOfVariables(); i++){
-				if((lowerboundvector[i]<0 || upperboundvector[i]<=0) && !(lowerboundvector[i]<0 && upperboundvector[i]<=0)){
+//				if((lowerboundvector[i]<0 || upperboundvector[i]<=0) && !(lowerboundvector[i]<0 && upperboundvector[i]<=0)){
+//				if(!((lowerboundvector[i]>=0 && upperboundvector[i]>=0) || (lowerboundvector[i]<=0 && upperboundvector[i]<=0))){
+				if(lowerboundvector[i]<0 && upperboundvector[i]<=0){ //negative
+					negativeVariables[i] = true;
+					numberOfNegativeVariables++;
+//					System.out.println("BLA");
+				} else if(lowerboundvector[i]<0 && upperboundvector[i]>0){ //unbounded
 					unboundedVariables[i] = true;
 					cn.add(lpreader.variableName(i)+"-");
 					m.addColumn();
 					numberOfUnboundedVariables++;
-				} else {
+//					System.out.println("BLA");
+				} else { //positiv variables
 					unboundedVariables[i] = false;
+					negativeVariables[i] = false;
 				}
 			}
 			for(int i = 0; i < lpreader.noOfVariables(); i ++){
@@ -64,8 +74,9 @@ public class InputLP {
 						if(unboundedVariables[i]){
 							m.addEntry(j, cn.indexOf(cn.get(i)+"-"), -matrix[j][i]);
 							m.addEntry(j, i, matrix[j][i]);
-						}else if(lowerboundvector[i]<0 && upperboundvector[i]<=0){
+						}else if(negativeVariables[i]){
 							m.addEntry(j, i, -matrix[j][i]);
+//							System.out.println("BLA");
 						} else {
 							m.addEntry(j, i, matrix[j][i]);
 						}
@@ -100,13 +111,16 @@ public class InputLP {
 						ec.add(new Tupel("L", "upperBound"+i));
 						rhsBounds.add(upperboundvector[i]);
 						numberOfSchlupfs++;
-					} else if (lowerboundvector[i]<0 && upperboundvector[i]<=0){
-						m.addRow();
-						m.addEntry(m.getRowNum()-1, i, -1);
-						rn.add("upperBound"+i);
-						ec.add(new Tupel("L", "upperBound"+i));
-						rhsBounds.add(upperboundvector[i]);
-						numberOfSchlupfs++;
+					} else if (negativeVariables[i]){
+						if(upperboundvector[i]!=0){
+//							System.out.println("BLA");
+							m.addRow();
+							m.addEntry(m.getRowNum()-1, i, 1);
+							rn.add("upperBound"+i);
+							ec.add(new Tupel("G", "upperBound"+i));
+							rhsBounds.add((-1)*upperboundvector[i]);
+							numberOfSchlupfs++;
+						}
 					} else {
 						m.addRow();
 						m.addEntry(m.getRowNum()-1, i, 1);
@@ -125,12 +139,13 @@ public class InputLP {
 						ec.add(new Tupel("G", "lowerBound"+i));
 						rhsBounds.add(lowerboundvector[i]);
 						numberOfSchlupfs++;
-					} else if (lowerboundvector[i]<0 && upperboundvector[i]<=0){
+					} else if (negativeVariables[i]){
+//						System.out.println("BLA");
 						m.addRow();
-						m.addEntry(m.getRowNum()-1, i, -1);
+						m.addEntry(m.getRowNum()-1, i, 1);
 						rn.add("lowerBound"+i);
-						ec.add(new Tupel("G", "lowerBound"+i));
-						rhsBounds.add(lowerboundvector[i]);
+						ec.add(new Tupel("L", "lowerBound"+i));
+						rhsBounds.add((-1)*lowerboundvector[i]);
 						numberOfSchlupfs++;
 					} else {
 						m.addRow();
@@ -153,7 +168,8 @@ public class InputLP {
 					if(unboundedVariables[i]){
 						c[i] = new Fraction(-obj[i]);
 						c[cn.indexOf(cn.get(i)+"-")] = new Fraction(obj[i]);
-					} else if (lowerboundvector[i]<0 && upperboundvector[i]<=0){
+					} else if (negativeVariables[i]){
+//						System.out.println("BLA");
 						c[i] = new Fraction(obj[i]);
 					} else {
 						c[i] = new Fraction(-obj[i]);
@@ -162,8 +178,9 @@ public class InputLP {
 					if(unboundedVariables[i]){
 						c[i] = new Fraction(obj[i]);
 						c[cn.indexOf(cn.get(i)+"-")] = new Fraction(-obj[i]);
-					} else if (lowerboundvector[i]<0 && upperboundvector[i]<=0){
+					} else if (negativeVariables[i]){
 						c[i] = new Fraction(-obj[i]);
+						System.out.println(c[i]);
 					} else {
 						c[i] = new Fraction( obj[i] );
 					}
@@ -197,7 +214,11 @@ public class InputLP {
 		in.readLP("src/InputData/small2.lp");
 		System.out.println("Ausgabe: ");
 		System.out.println(in.getM().toString());
-//		System.out.println("B: " + );
+		for(int i = 0; i< in.getC().length;i++){
+			System.out.println("C: " + in.getC()[i]);
+		}
+		System.out.println(in.getRn());
+
 	}
 
 	public Matrix getM() {
@@ -218,6 +239,16 @@ public class InputLP {
 
 	public void setMax(boolean isMax) {
 		this.isMax = isMax;
+	}
+
+
+	public Fraction[] getC() {
+		return c;
+	}
+
+
+	public Fraction[] getB() {
+		return b;
 	}
 
 }
