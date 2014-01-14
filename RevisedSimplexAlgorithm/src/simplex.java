@@ -29,7 +29,7 @@ public class simplex {
 		String status = "";
 		if(simplex.isPerfect){
 			status = "Optimal";
-			out = new Output(in.getCn(), simplex.getbQuer(), simplex.getBasis(), simplex.getOptimum(),status, dataOutputName);
+			out = new Output(lin, in.getCn(), simplex.getbQuer(), simplex.getBasis(), simplex.getOptimum(),status, dataOutputName);
 
 		} else if (simplex.istLeer){
 			status = "Unbounded";
@@ -42,29 +42,4 @@ public class simplex {
 		}
 	}
 	
-//	public static void main(String[] args) {
-//		// TODO Auto-generated method stub
-//		boolean showComments = false;
-//		Output out = null; 
-//		try {
-//			String dataName = args[0];
-//			String dataOutputName = args[1];
-//			if(args.length > 2){
-//				if(args[2].equals("1"))
-//					showComments = true;
-//			}
-//			Input in = new Input();
-//			LP lin = in.readInput("InputData/"+dataName);
-//			Simplex simplex = new Simplex(lin);
-//			simplex.calculateOptimum(showComments);
-//			
-//			if(simplex.isPerfect)
-//				out = new Output(in.getCn(), simplex.getbQuer(), simplex.getBasis(),simplex.getOptimum(),"Optimal", "OutputData/"+dataOutputName);
-//			
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
-
 }
